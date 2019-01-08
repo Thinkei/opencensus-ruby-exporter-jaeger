@@ -5,7 +5,7 @@ require 'jaeger/thrift_tag_builder'
 module Opencensus
   module Trace
     module Exporters
-      class JaegerDriver
+      module JaegerDriver
         class Converter
           def initialize
             @tags = {}

@@ -1,12 +1,14 @@
 require 'socket'
-require 'jaeger/client'
 require 'concurrent-ruby'
+require_relative './jaeger-driver/converter'
+require_relative './jaeger-driver/udp_sender'
 
 module Opencensus
   module Trace
     module Exporters
       class Jaeger
         include Logging
+
         JAEGER_OPENCENSUS_EXPORTER_VERSION_TAG_KEY = 'opencensus.exporter.jaeger.version'
         TRACER_HOSTNAME_TAG_KEY = 'opencensus.exporter.jaeger.hostname'
         PROCESS_IP = 'ip'
@@ -21,7 +23,6 @@ module Opencensus
             max_queue: 1000,
             auto_terminate_time: 10,
             flush_interval: nil
-
           @logger = logger || default_logger
           @service_name = service_name
           @host = host
@@ -54,14 +55,19 @@ module Opencensus
 
           @client_promise.execute
           export_promise = @client_promise.then do |client|
-            export_as_batch
+            export_as_batch client, spans
+          end
+          export_promise.on_error do |error|
+            @logger.warn 'Unable to export to Jaeger because of: #{error}'
           end
         end
 
         private
 
         def export_as_batch client, spans
-          # do converting and export to jaeger
+          converter = JaegerDriver::Converter.new
+          jaeger_spans = Array(spans).map { |span| converter.convert span }
+          client.send spans jaeger_spans
         end
 
         def get_ip_v4
