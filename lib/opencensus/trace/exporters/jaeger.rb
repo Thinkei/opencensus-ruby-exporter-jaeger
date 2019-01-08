@@ -27,11 +27,10 @@ module Opencensus
           @host = host
           @port = port
           @flush_interval = @flush_interval
-          @default_tags = {}
-          @default_tags[JAEGER_OPENCENSUS_EXPORTER_VERSION_TAG_KEY] = "opencensus-exporter-jaeger-#{Jaeger::VERSION}"
-          @default_tags[TRACER_HOSTNAME_TAG_KEY] = Socket.gethostname
-          @default_tags[PROCESS_IP] = get_ip_v4 unless get_ip_v4.nil?
-          @tags = @default_tags.merge tags
+          @opencensus_info_tag = {
+            'JAEGER_OPENCENSUS_EXPORTER_VERSION_TAG_KEY': "opencensus-exporter-jaeger-#{Jaeger::VERSION}"
+          }
+          @tags = @opencensus_info_tag.merge tags
 
           @executor = create_executor max_threads, max_queue
           if auto_terminate_time
@@ -51,7 +50,7 @@ module Opencensus
 
         def export spans
           raise 'Executor is no longer running' unless @executor.running?
-          return nil if span.nil? || spans.empty?
+          return nil if spans.nil? || spans.empty?
 
           @client_promise.execute
           export_promise = @client_promise.then do |client|
