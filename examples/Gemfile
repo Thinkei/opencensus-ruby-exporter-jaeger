@@ -1,0 +1,11 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+gem 'opencensus'
+gem 'sinatra'
+gem 'thin'
+gem 'faraday'
+gem 'opencensus-jaeger', path: "~/asobiba/opencensus-jaeger"
+gem 'jaeger-client'
+gem 'pry-byebug'

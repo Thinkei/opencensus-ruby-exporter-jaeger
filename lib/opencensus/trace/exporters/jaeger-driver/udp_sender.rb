@@ -1,12 +1,13 @@
 require 'jaeger/udp_sender/transport'
 require 'thrift'
+require 'pry-byebug'
 
 module Opencensus
   module Trace
     module Exporters
       module JaegerDriver
         class UdpSender
-          include Logging
+          include ::Logging
 
           def initialize \
               host: nil,
@@ -16,7 +17,7 @@ module Opencensus
             @host = host
             @port = port
 
-            transport = ::Jaeger::UdpSender::Transport.new host,port
+            transport = ::Jaeger::UdpSender::Transport.new host, port
             protocol = ::Thrift::CompactProtocol.new transport
             @client = ::Jaeger::Thrift::Agent::Client.new protocol
           end
@@ -24,7 +25,7 @@ module Opencensus
           def send_spans spans
             @client.emitBatch spans
           rescue StandardError => error
-            @logger.error("Failure while sending a batch of spans: #{error}")
+            @logger.error "Failure while sending a batch of spans: #{error}"
           end
         end
       end

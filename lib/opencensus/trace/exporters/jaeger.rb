@@ -1,5 +1,8 @@
 require 'socket'
 require 'concurrent-ruby'
+require 'jaeger/client'
+require_relative '../../jaeger/version'
+require_relative '../../logging'
 require_relative './jaeger-driver/converter'
 require_relative './jaeger-driver/udp_sender'
 
@@ -7,7 +10,7 @@ module Opencensus
   module Trace
     module Exporters
       class Jaeger
-        include Logging
+        include ::Logging
 
         JAEGER_OPENCENSUS_EXPORTER_VERSION_TAG_KEY = 'opencensus.exporter.jaeger.version'
         TRACER_HOSTNAME_TAG_KEY = 'opencensus.exporter.jaeger.hostname'
@@ -18,7 +21,7 @@ module Opencensus
             service_name: nil,
             host: 'localhost',
             port: nil,
-            tags: nil,
+            tags: {},
             max_threads: 1,
             max_queue: 1000,
             auto_terminate_time: 10,
@@ -29,10 +32,9 @@ module Opencensus
           @port = port
           @flush_interval = @flush_interval
           @opencensus_info_tag = {
-            'JAEGER_OPENCENSUS_EXPORTER_VERSION_TAG_KEY': "opencensus-exporter-jaeger-#{Jaeger::VERSION}"
+            'JAEGER_OPENCENSUS_EXPORTER_VERSION_TAG_KEY': "opencensus-exporter-jaeger-#{Opencensus::Jaeger::VERSION}"
           }
           @tags = @opencensus_info_tag.merge tags
-
           @executor = create_executor max_threads, max_queue
           if auto_terminate_time
             terminate_at_exit! @executor, auto_terminate_time
@@ -41,10 +43,7 @@ module Opencensus
           @client_config = {
             host: @host,
             port: @port,
-            service_name: @service_name,
-            logger: @logger,
-            flush_interval: @flush_interval,
-            tags: @tags
+            logger: @logger
           }
           @client_promise = create_client_promise @executor, @client_config
         end
@@ -52,13 +51,12 @@ module Opencensus
         def export spans
           raise 'Executor is no longer running' unless @executor.running?
           return nil if spans.nil? || spans.empty?
-
           @client_promise.execute
           export_promise = @client_promise.then do |client|
             export_as_batch client, spans
           end
           export_promise.on_error do |error|
-            @logger.warn 'Unable to export to Jaeger because of: #{error}'
+            @logger.warn "Unable to export to Jaeger because of: #{error}. Backtrace: #{error.backtrace}"
           end
         end
 
@@ -67,7 +65,14 @@ module Opencensus
         def export_as_batch client, spans
           converter = JaegerDriver::Converter.new
           jaeger_spans = Array(spans).map { |span| converter.convert span }
-          client.send spans jaeger_spans
+          spans_batch = ::Jaeger::Thrift::Batch.new(
+            'process' => ::Jaeger::Thrift::Process.new(
+              'serviceName' => @service_name,
+              'tags' => @tags
+            ),
+            'spans' => jaeger_spans
+          )
+          client.send_spans spans_batch
         end
 
         def get_ip_v4
@@ -78,7 +83,7 @@ module Opencensus
         end
 
         def create_client client_config
-          ::Jaeger::Client.build client_config
+          JaegerDriver::UdpSender.new client_config
         end
 
         def create_executor max_threads, max_queue
@@ -94,6 +99,7 @@ module Opencensus
 
         def terminate_at_exit! executor, timeout
           at_exit do
+            @logger.info "ThreadPoolExecutor shutdown!"
             executor.shutdown
             unless executor.wait_for_termination timeout
               executor.kill
@@ -103,7 +109,7 @@ module Opencensus
         end
 
         def create_client_promise \
-            executor, client_config
+          executor, client_config
           Concurrent::Promise.new executor: executor do
             create_client client_config
           end
