@@ -9,7 +9,7 @@ OpenCensus.configure do |c|
     logger: nil,
     service_name: 'test_service',
     host: 'localhost',
-    port: 6832,
+    port: 6831,
     max_threads: 10
 end
 
