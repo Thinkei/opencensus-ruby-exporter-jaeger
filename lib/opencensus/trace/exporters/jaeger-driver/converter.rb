@@ -7,8 +7,8 @@ module Opencensus
       module JaegerDriver
         class Converter
           class << self
-            def convert span
-              tags = Utils.build_thrift_tags span.attributes
+            def convert(span)
+              tags = Utils.build_thrift_tags(span.attributes)
               trace_id_high = Utils.base16_hex_to_int64(
                 span.trace_id.slice(0, 16)
               )

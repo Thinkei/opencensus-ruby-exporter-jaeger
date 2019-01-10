@@ -9,21 +9,22 @@ module Opencensus
         class UdpSender
           include ::Logging
 
-          def initialize \
-              host: nil,
-              port: nil,
-              logger: nil
+          def initialize(
+            host: nil,
+            port: nil,
+            logger: nil
+          )
             @logger = logger || default_logger
             @host = host
             @port = port
 
-            transport = ::Jaeger::UdpSender::Transport.new host, port
-            protocol = ::Thrift::CompactProtocol.new transport
-            @client = ::Jaeger::Thrift::Agent::Client.new protocol
+            transport = ::Jaeger::UdpSender::Transport.new(host, port)
+            protocol = ::Thrift::CompactProtocol.new(transport)
+            @client = ::Jaeger::Thrift::Agent::Client.new(protocol)
           end
 
-          def send_spans spans
-            @client.emitBatch spans
+          def send_spans(spans)
+            @client.emitBatch(spans)
           rescue StandardError => error
             @logger.error "Failure while sending a batch of spans: #{error}"
           end

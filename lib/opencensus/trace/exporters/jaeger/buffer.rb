@@ -3,8 +3,8 @@ module Opencensus
     module Exporters
       class Jaeger
         class Buffer
-          def initialize()
-            # Todo: implement a buffer later
+          def initialize
+            # TODO: implement a buffer later
           end
         end
       end

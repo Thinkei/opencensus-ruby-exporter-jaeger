@@ -25,8 +25,8 @@ module Opencensus
             end
 
             def base16_hex_to_int64(id)
-              uint64_id = base16_hex_id_to_uint64 id
-              uint64_id_to_int64 uint64_id
+              uint64_id = base16_hex_id_to_uint64(id)
+              uint64_id_to_int64(uint64_id)
             end
 
             def build_thrift_tags(attributes)
