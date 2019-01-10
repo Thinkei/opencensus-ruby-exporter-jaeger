@@ -33,3 +33,6 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/opencensus-jaeger.
+
+## Working proof 
+![image](https://user-images.githubusercontent.com/15828926/50948201-3e28e300-14d4-11e9-87ee-f5d97b756131.png)
