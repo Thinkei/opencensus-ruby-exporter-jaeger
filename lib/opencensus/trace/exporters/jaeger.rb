@@ -1,8 +1,10 @@
 require 'concurrent-ruby'
 require 'jaeger/client'
+require 'socket'
 require_relative '../../jaeger/version'
 require_relative '../../logging'
 require_relative './jaeger-driver/converter'
+require_relative './jaeger-driver/utils'
 require_relative './jaeger-driver/udp_sender'
 
 module Opencensus
@@ -30,10 +32,12 @@ module Opencensus
           @host = host
           @port = port
           @flush_interval = @flush_interval
-          @opencensus_info_tag = {
-            'JAEGER_OPENCENSUS_EXPORTER_VERSION_TAG_KEY': "opencensus-exporter-jaeger-#{Opencensus::Jaeger::VERSION}"
+          default_tags = {
+            'JAEGER_VERSION': "ruby-#{::Jaeger::Client::VERSION}",
+            'TRACER_HOSTNAME': Socket.gethostname,
+            'PROCESS_IP': get_ip_v4
           }
-          @tags = @opencensus_info_tag.merge tags
+          @tags = tags.merge default_tags
           @executor = create_executor max_threads, max_queue
           if auto_terminate_time
             terminate_at_exit! @executor, auto_terminate_time
@@ -61,14 +65,20 @@ module Opencensus
 
         private
 
+        def get_ip_v4
+          ipv4 = Socket.ip_address_list.find { |ai| ai.ipv4? && !ai.ipv4_loopback? }
+          ipv4.nil? ? nil : ipv4.ip_address
+        end
+
         def export_as_batch client, spans
-          @logger.info "Sending #{spans}"
-          converter = JaegerDriver::Converter.new
-          jaeger_spans = Array(spans).map { |span| converter.convert span }
+          @logger.info "Sending #{spans.inspect}"
+          jaeger_spans = Array(spans).map {
+            |span| JaegerDriver::Converter.convert span
+          }
           spans_batch = ::Jaeger::Thrift::Batch.new(
             'process' => ::Jaeger::Thrift::Process.new(
-              'serviceName' => @service_name,
-              'tags' => @tags
+              'serviceName': @service_name,
+              'tags': JaegerDriver::Utils.build_thrift_tags(@tags)
             ),
             'spans' => jaeger_spans
           )
