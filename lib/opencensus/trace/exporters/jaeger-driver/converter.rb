@@ -1,7 +1,6 @@
 require 'jaeger/tracer'
-require_relative './utils'
 
-module Opencensus
+module OpenCensus
   module Trace
     module Exporters
       module JaegerDriver

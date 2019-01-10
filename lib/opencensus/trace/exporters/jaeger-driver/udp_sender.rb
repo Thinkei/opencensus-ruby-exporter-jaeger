@@ -1,8 +1,7 @@
 require 'jaeger/udp_sender/transport'
 require 'thrift'
-require 'pry-byebug'
 
-module Opencensus
+module OpenCensus
   module Trace
     module Exporters
       module JaegerDriver

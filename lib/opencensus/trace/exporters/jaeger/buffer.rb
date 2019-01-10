@@ -1,4 +1,4 @@
-module Opencensus
+module OpenCensus
   module Trace
     module Exporters
       class Jaeger

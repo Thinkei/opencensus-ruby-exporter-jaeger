@@ -5,7 +5,7 @@ require 'opencensus/trace/integrations/faraday_middleware'
 require_relative './example.rb'
 
 OpenCensus.configure do |c|
-  c.trace.exporter = Opencensus::Trace::Exporters::Jaeger.new \
+  c.trace.exporter = OpenCensus::Trace::Exporters::Jaeger.new \
     logger: nil,
     service_name: 'test_service',
     host: 'localhost',

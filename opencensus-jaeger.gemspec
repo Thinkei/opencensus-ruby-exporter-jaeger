@@ -1,11 +1,11 @@
-
+# coding: utf-8
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "opencensus/jaeger/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "opencensus-jaeger"
-  spec.version       = Opencensus::Jaeger::VERSION
+  spec.version       = OpenCensus::Jaeger::VERSION
   spec.authors       = ["Luong Vo"]
   spec.email         = ["vo.tran.thanh.luong@gmail.com"]
 

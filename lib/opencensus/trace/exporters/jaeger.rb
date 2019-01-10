@@ -1,13 +1,8 @@
 require 'concurrent-ruby'
 require 'jaeger/client'
 require 'socket'
-require_relative '../../jaeger/version'
-require_relative '../../logging'
-require_relative './jaeger-driver/converter'
-require_relative './jaeger-driver/utils'
-require_relative './jaeger-driver/udp_sender'
 
-module Opencensus
+module OpenCensus
   module Trace
     module Exporters
       class Jaeger

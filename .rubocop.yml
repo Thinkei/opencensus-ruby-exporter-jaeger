@@ -1,6 +1,6 @@
 AllCops:
   Exclude:
-    - "opencensus.gemspec"
+    - "opencensus-jaeger.gemspec"
     - "test/**/*"
 
 Documentation:

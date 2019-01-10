@@ -1,6 +1,6 @@
 require 'jaeger/span/thrift_tag_builder'
 
-module Opencensus
+module OpenCensus
   module Trace
     module Exporters
       module JaegerDriver
