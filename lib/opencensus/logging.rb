@@ -11,7 +11,7 @@ module Logging
 
   def self.included base
     class << base
-      def default_logger
+      def logger
         Logging.logger
       end
     end
