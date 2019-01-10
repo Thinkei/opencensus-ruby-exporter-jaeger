@@ -8,11 +8,11 @@ module Opencensus
       module JaegerDriver
         class Converter
           def initialize
-            @tags = {}
+            @tags = []
           end
 
           def convert span
-            @tags.merge! span.attributes
+            build_thrift_tags span.attributes
             trace_id_high = span.trace_id.slice(0, 16)
             trace_id_low = span.trace_id.slice(16)
             span_id = span.span_id
@@ -24,7 +24,7 @@ module Opencensus
             end_time = span.end_time.to_f * 1_000_000
             duration = end_time - start_time
 
-            return ::Jaeger::Thrift::Span.new(
+            ::Jaeger::Thrift::Span.new(
               'traceIdLow': base16_hex_to_int64(trace_id_low),
               'traceIdHigh': base16_hex_to_int64(trace_id_high),
               'spanId': base16_hex_to_int64(span_id),
@@ -34,7 +34,7 @@ module Opencensus
               'flags': flags,
               'startTime': start_time,
               'duration': duration,
-              'tags': build_thrift_tags(@tags)
+              'tags': @tags
             )
           end
 
@@ -46,8 +46,8 @@ module Opencensus
           end
 
           def build_thrift_tags tags
-            tags.map do |key, value|
-              ::Jaeger::Span::ThriftTagBuilder.build(key, value)
+            tags.each do |key, value|
+              @tags << ::Jaeger::Span::ThriftTagBuilder.build(key, value)
             end
           end
         end

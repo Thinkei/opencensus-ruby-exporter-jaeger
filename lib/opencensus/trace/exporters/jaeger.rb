@@ -1,4 +1,3 @@
-require 'socket'
 require 'concurrent-ruby'
 require 'jaeger/client'
 require_relative '../../jaeger/version'
@@ -63,6 +62,7 @@ module Opencensus
         private
 
         def export_as_batch client, spans
+          @logger.info "Sending #{spans}"
           converter = JaegerDriver::Converter.new
           jaeger_spans = Array(spans).map { |span| converter.convert span }
           spans_batch = ::Jaeger::Thrift::Batch.new(
@@ -73,13 +73,6 @@ module Opencensus
             'spans' => jaeger_spans
           )
           client.send_spans spans_batch
-        end
-
-        def get_ip_v4
-          ipv4 = Socket.ip_address_list.find do |ai|
-            ai.ipv4 && !ai.ipv4.loopback?
-          end
-          ipv4.nil? ? nil : ipv4.ip_address
         end
 
         def create_client client_config
