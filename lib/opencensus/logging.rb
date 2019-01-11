@@ -7,14 +7,14 @@ module Logging
 
   def self.logger
     @logger ||= Logger.new(STDOUT)
-    @logger.level = ENV['LOG_LEVEL'] || Logger::DEBUG
+    @logger.level = ENV['LOG_LEVEL'] || Logger::INFO
     at_exit do
       @logger.close
     end
     @logger
   end
 
-  def self.included base
+  def self.included(base)
     class << base
       def logger
         Logging.logger

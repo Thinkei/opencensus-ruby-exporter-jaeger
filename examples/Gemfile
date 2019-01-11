@@ -7,5 +7,4 @@ gem 'sinatra'
 gem 'thin'
 gem 'faraday'
 gem 'opencensus-jaeger', path: "~/asobiba/opencensus-jaeger"
-gem 'jaeger-client'
 gem 'pry-byebug'

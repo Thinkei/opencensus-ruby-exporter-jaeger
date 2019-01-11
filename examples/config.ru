@@ -1,4 +1,3 @@
-require 'jaeger/client'
 require 'opencensus/jaeger'
 require 'opencensus/trace/integrations/rack_middleware'
 require 'opencensus/trace/integrations/faraday_middleware'

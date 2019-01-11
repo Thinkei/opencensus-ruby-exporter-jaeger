@@ -1,5 +1,4 @@
 require 'concurrent-ruby'
-require 'jaeger/client'
 require 'socket'
 
 module OpenCensus
@@ -28,13 +27,14 @@ module OpenCensus
           @host = host
           @port = port
           @flush_interval = @flush_interval
-          default_tags = {
-            'JAEGER_VERSION': "ruby-#{::Jaeger::Client::VERSION}",
-            'TRACER_HOSTNAME': Socket.gethostname,
-            'PROCESS_IP': ip_v4
-          }
+          default_tags = {}
+          default_tags[JAEGER_OPENCENSUS_EXPORTER_VERSION_TAG_KEY] = \
+            "opencensus-exporter-jaeger-#{OpenCensus::Jaeger::VERSION}"
+          default_tags[TRACER_HOSTNAME_TAG_KEY] = Socket.gethostname
+          default_tags[PROCESS_IP] = ip_v4
           @tags = tags.merge(default_tags)
           @executor = create_executor(max_threads, max_queue)
+
           if auto_terminate_time
             terminate_at_exit!(@executor, auto_terminate_time)
           end
@@ -67,7 +67,7 @@ module OpenCensus
         end
 
         def export_as_batch(client, spans)
-          @logger.info "Sending #{spans.inspect}"
+          @logger.debug "Sending #{spans.inspect}"
           jaeger_spans = Array(spans).map do |span|
             JaegerDriver::Converter.convert(span)
           end
@@ -79,10 +79,6 @@ module OpenCensus
             'spans' => jaeger_spans
           )
           client.send_spans(spans_batch)
-        end
-
-        def create_client(client_config)
-          JaegerDriver::UdpSender.new(client_config)
         end
 
         def create_executor(max_threads, max_queue)
@@ -97,6 +93,18 @@ module OpenCensus
           end
         end
 
+        def create_client_promise(
+          executor, client_config
+        )
+          Concurrent::Promise.new executor: executor do
+            create_client(client_config)
+          end
+        end
+
+        def create_client(client_config)
+          JaegerDriver::UdpSender.new(client_config)
+        end
+
         def terminate_at_exit!(executor, timeout)
           at_exit do
             @logger.info('ThreadPoolExecutor shutdown!')
@@ -105,14 +113,6 @@ module OpenCensus
               executor.kill
               executor.wait_for_termination(timeout)
             end
-          end
-        end
-
-        def create_client_promise(
-          executor, client_config
-        )
-          Concurrent::Promise.new executor: executor do
-            create_client(client_config)
           end
         end
       end

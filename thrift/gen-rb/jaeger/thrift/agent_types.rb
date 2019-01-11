@@ -8,7 +8,6 @@ require 'thrift'
 require 'jaeger/thrift/jaeger_types'
 require 'zipkin/zipkincore_types'
 
-
 module Jaeger
   module Thrift
   end

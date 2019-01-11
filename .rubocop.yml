@@ -2,6 +2,8 @@ AllCops:
   Exclude:
     - "opencensus-jaeger.gemspec"
     - "test/**/*"
+    - "thrift/**/*"
+    - "examples/**/*"
 
 Documentation:
   Enabled: false

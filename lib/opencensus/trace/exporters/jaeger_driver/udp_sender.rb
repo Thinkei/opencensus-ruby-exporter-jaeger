@@ -1,4 +1,3 @@
-require 'jaeger/udp_sender/transport'
 require 'thrift'
 
 module OpenCensus
@@ -17,7 +16,7 @@ module OpenCensus
             @host = host
             @port = port
 
-            transport = ::Jaeger::UdpSender::Transport.new(host, port)
+            transport = UdpTransport.new(host: host, port: port, logger: logger)
             protocol = ::Thrift::CompactProtocol.new(transport)
             @client = ::Jaeger::Thrift::Agent::Client.new(protocol)
           end

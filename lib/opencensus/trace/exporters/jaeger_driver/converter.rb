@@ -1,5 +1,3 @@
-require 'jaeger/tracer'
-
 module OpenCensus
   module Trace
     module Exporters
@@ -39,6 +37,8 @@ module OpenCensus
                 'duration': duration,
                 'tags': tags
               )
+            rescue StandardError => e
+              puts "convert error #{e}"
             end
           end
         end
