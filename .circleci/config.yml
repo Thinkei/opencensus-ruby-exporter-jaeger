@@ -1,0 +1,48 @@
+version: 2
+jobs:
+  test:
+    docker:
+      - image: circleci/ruby:2.4.1-node
+        environment:
+          LOG_LEVEL: DEBUG
+    steps:
+      - checkout
+      - run: bundle install --path vendor/bundle
+      - run: bundle exec rspec
+
+  publish:
+    docker:
+      - image: ehdevops/ruby240:latest
+    steps:
+      - checkout
+      - run: bundle check || bundle install --path=vendor/bundle --jobs=4 --retry=3
+      - run:
+          name: Deploy to gemfury
+          command: |
+            bundle exec ruby scripts/publish.rb
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test:
+          context: org-global
+          filters:
+            branches:
+              only:
+                - employment-hero
+      - publish_new_version:
+          type: approval
+          filters:
+            branches:
+              only:
+                - employment-hero
+      - publish:
+          context: org-global
+          filters:
+            branches:
+              only:
+                - employment-hero
+          requires:
+            - test
+            - publish_new_version

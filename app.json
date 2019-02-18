@@ -1,0 +1,12 @@
+{
+  "name": "opencensus-jaeger",
+  "version": "0.1.0",
+  "documents": [
+    {
+      "name": "README",
+      "source": "README.md",
+      "format": "markdown",
+      "description": "Opencensus-Jaeger Exporter for Ruby lang"
+    }
+  ]
+}

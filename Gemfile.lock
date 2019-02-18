@@ -40,6 +40,7 @@ GEM
 PLATFORMS
   ruby
   x86_64-darwin-17
+  x86_64-darwin-18
 
 DEPENDENCIES
   bundler (~> 1.16)
@@ -49,4 +50,4 @@ DEPENDENCIES
   rspec (~> 3.0)
 
 BUNDLED WITH
-   1.16.6
+   1.17.3

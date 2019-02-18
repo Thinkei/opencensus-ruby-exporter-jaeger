@@ -1,11 +1,13 @@
 # coding: utf-8
+require 'json'
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "opencensus/jaeger/version"
+
+manifest = JSON.parse(File.read('app.json'))
 
 Gem::Specification.new do |spec|
   spec.name          = "opencensus-jaeger"
-  spec.version       = OpenCensus::Jaeger::VERSION
+  spec.version       = manifest['version']
   spec.authors       = ["Luong Vo"]
   spec.email         = ["vo.tran.thanh.luong@gmail.com"]
 
