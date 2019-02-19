@@ -7,7 +7,7 @@ module Logging
 
   def self.logger
     @logger ||= Logger.new(STDOUT)
-    @logger.level = ENV['LOG_LEVEL'] || Logger::INFO
+    @logger.level = ENV['LOG_LEVEL'].to_i || Logger::INFO
     at_exit do
       @logger.close
     end
