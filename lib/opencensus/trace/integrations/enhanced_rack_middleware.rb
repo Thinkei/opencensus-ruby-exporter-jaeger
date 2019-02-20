@@ -15,7 +15,7 @@ module OpenCensus
         def get_path(env)
           path = "#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
           path = "/#{path}" unless path.start_with? '/'
-          generalize(path)
+          generalize_path(path)
         end
 
         def generalize_path(path)
