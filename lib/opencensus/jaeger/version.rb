@@ -1,5 +1,6 @@
 module OpenCensus
   module Jaeger
-    VERSION = '0.1.0'.freeze
+    manifest_path = File.expand_path('../../../app.json', __dir__)
+    VERSION = JSON.parse(File.read(manifest_path))['version']
   end
 end

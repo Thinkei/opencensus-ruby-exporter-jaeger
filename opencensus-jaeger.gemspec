@@ -6,7 +6,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 manifest = JSON.parse(File.read('app.json'))
 
 Gem::Specification.new do |spec|
-  spec.name          = "opencensus-jaeger"
+  spec.name          = manifest['name']
   spec.version       = manifest['version']
   spec.authors       = ["Luong Vo"]
   spec.email         = ["vo.tran.thanh.luong@gmail.com"]
