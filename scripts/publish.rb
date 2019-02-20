@@ -1,4 +1,7 @@
-manifest_path = File.expand_path('../app.json', __dir__)
-version = JSON.parse(File.read(manifest_path))['version']
+lib = File.expand_path("../lib", __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'opencensus/jaeger/version'
+
+version = OpenCensus::Jaeger::VERSION
 
 exec("gem build opencensus-jaeger.gemspec && curl -F package=@opencensus-jaeger-#{version}.gem https://#{ENV['GEMFURY_TOKEN']}@push.fury.io/#{ENV['GEMFURY_PACKAGE']}/")
