@@ -1,9 +1,10 @@
-require "opencensus"
+require 'opencensus'
+require 'opencensus/trace/integrations/rack_middleware'
 
 module OpenCensus
   module Trace
     module Integrations
-      class EnhancedRackMiddleware
+      class EnhancedRackMiddleware < RackMiddleware
         UUID_PATTERN = /\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\/|$)/
         ID_PATTERN = /\/[0-9]+(\/|$)/
         FILE_PATTERN = /[a-z0-9]{5,}\.(png|js)/
