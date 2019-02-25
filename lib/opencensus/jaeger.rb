@@ -1,3 +1,5 @@
+require 'opencensus'
+
 module OpenCensus
 end
 
