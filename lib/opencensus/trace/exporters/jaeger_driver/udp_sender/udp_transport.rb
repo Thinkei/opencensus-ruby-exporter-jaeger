@@ -5,6 +5,24 @@ module OpenCensus
         class UdpSender
           class UdpTransport
             FLAGS = 0
+            DEFAULT_UDP_SIZE = 65536 # 64kb
+            MIN_UDP_SIZE = 4096 # 8kb
+
+            class << self
+              def udp_max_size
+                @udp_max_size ||= DEFAULT_UDP_SIZE
+              end
+
+              def can_adjust_udp_max?
+                udp_max_size / 2 >= MIN_UDP_SIZE
+              end
+
+              def adjust_udp_max_size!
+                if can_adjust_udp_max?
+                  @udp_max_size /= 2
+                end
+              end
+            end
 
             def initialize(host:, port:, logger:)
               @socket = UDPSocket.new
@@ -30,14 +48,31 @@ module OpenCensus
             private
 
             def send_bytes(bytes)
-              @socket.send(bytes, FLAGS, @host, @port)
-              @socket.flush
-            rescue Errno::ECONNREFUSED
-              @logger.warn 'Unable to connect to Jaeger Agent'
-            rescue Errno::EMSGSIZE
-              @logger.error 'Unabel to send span due to UDP max size'
-            rescue StandardError => e
-              @logger.warn "Unable to send spans: #{e.message}"
+              @logger.debug "Send UDP diagram of size #{bytes.bytesize}, batch size: #{self.class.udp_max_size}"
+              begin
+                if bytes.bytesize > self.class.udp_max_size
+                  bytes.bytes.each_slice(self.class.udp_max_size) do |batch|
+                    @socket.send(batch.pack('C*'), FLAGS, @host, @port)
+                    @socket.flush
+                  end
+                else
+                  @socket.send(bytes, FLAGS, @host, @port)
+                  @socket.flush
+                end
+              rescue Errno::ECONNREFUSED
+                @logger.warn 'Unable to connect to Jaeger Agent'
+              rescue Errno::EMSGSIZE
+                if self.class.can_adjust_udp_max?
+                  self.class.adjust_udp_max_size!
+                  @logger.warn "Adjust UDP batch size: #{self.class.udp_max_size}"
+                  retrying = true
+                  retry
+                else
+                  @logger.error 'Unable to send span due to UDP max size. Give up!'
+                end
+              rescue StandardError => e
+                @logger.warn "Unable to send spans: #{e.message}"
+              end
             end
           end
         end
