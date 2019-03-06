@@ -6,7 +6,7 @@ module OpenCensus
           class UdpTransport
             FLAGS = 0
             DEFAULT_UDP_SIZE = 65536 # 64kb
-            MIN_UDP_SIZE = 4096 # 8kb
+            MIN_UDP_SIZE = 512 # 512 bytes
 
             class << self
               def udp_max_size
