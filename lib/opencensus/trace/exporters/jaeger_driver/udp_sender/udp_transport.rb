@@ -65,7 +65,6 @@ module OpenCensus
                 if self.class.can_adjust_udp_max?
                   self.class.adjust_udp_max_size!
                   @logger.warn "Adjust UDP batch size: #{self.class.udp_max_size}"
-                  retrying = true
                   retry
                 else
                   @logger.error 'Unable to send span due to UDP max size. Give up!'
