@@ -37,7 +37,6 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "opencensus", "~> 0.4.0"
-  spec.add_dependency "concurrent-ruby", "~> 1.1.4"
   spec.add_dependency "thrift", "~> 0.11.0"
 
   spec.add_development_dependency "rake", "~> 10.0"
