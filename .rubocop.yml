@@ -17,11 +17,17 @@ Metrics/ClassLength:
   Enabled: false
 Metrics/ParameterLists:
   Enabled: false
+Metrics/PerceivedComplexity:
+  Enabled: false
+Metrics/CyclomaticComplexity:
+  Enabled: false
 Lint/UnusedMethodArgument:
   Enabled: false
 Layout/EmptyLineAfterGuardClause:
   Enabled: false
 Style/IfUnlessModifier:
+  Enabled: false
+Style/ModuleFunction:
   Enabled: false
 
 Metrics/LineLength:
