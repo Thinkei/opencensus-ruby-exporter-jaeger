@@ -11,6 +11,8 @@ Metrics/BlockLength:
   Enabled: false
 Metrics/MethodLength:
   Enabled: false
+Metrics/ModuleLength:
+  Enabled: false
 Metrics/AbcSize:
   Enabled: false
 Metrics/ClassLength:

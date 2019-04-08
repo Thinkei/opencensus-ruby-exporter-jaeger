@@ -33,8 +33,6 @@ module OpenCensus
             @socket.flush
           rescue Errno::ECONNREFUSED
             @logger.warn 'Unable to connect to Jaeger Agent'
-          rescue Errno::EMSGSIZE
-            @logger.error 'Unable to send span due to UDP max size'
           rescue StandardError => e
             @logger.warn "Unable to send spans: #{e.message}"
           end

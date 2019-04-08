@@ -34,7 +34,7 @@ module OpenCensus
           @client = JaegerDriver::UDPSender.new(host, port, logger, protocol_class)
           @process = ::Jaeger::Thrift::Process.new(
             'serviceName': @service_name,
-            'tags': JaegerDriver::Utils.build_thrift_tags(@tags)
+            'tags': JaegerDriver.build_thrift_tags(@tags)
           )
           @protocol_class = protocol_class
         end
