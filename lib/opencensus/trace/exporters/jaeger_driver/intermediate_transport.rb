@@ -13,7 +13,10 @@ module OpenCensus
             @size += buf.size
           end
 
-          def flush; end
+          def flush
+            @size = 0
+          end
+
           def close; end
         end
       end

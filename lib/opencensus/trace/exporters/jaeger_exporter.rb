@@ -57,21 +57,19 @@ module OpenCensus
         def encode_within_limit(spans)
           batches = []
           current_batch = []
-          current_batch_size = 0
 
           spans.each do |span|
             encoded_span = JaegerDriver.encode_span(span)
-            encoded_span_size = calculate_span_size(encoded_span)
-            if encoded_span_size + current_batch_size >= DEFAULT_MAX_LENGTH && !current_batch.empty?
+            if aggregated_span_size(encoded_span) >= DEFAULT_MAX_LENGTH && !current_batch.empty?
               batches << encode_batch(current_batch)
               current_batch = []
-              current_batch_size = 0
+              @transport.flush
             end
             current_batch << encoded_span
-            current_batch_size += encoded_span_size
           end
 
           batches << encode_batch(current_batch) unless current_batch.empty?
+          @transport.flush
           batches
         end
 
@@ -84,12 +82,12 @@ module OpenCensus
 
         private
 
-        def calculate_span_size(span)
+        def aggregated_span_size(span)
           # https://github.com/apache/thrift/blob/master/lib/rb/lib/thrift/struct.rb#L95
-          transport = JaegerDriver::IntermediateTransport.new
-          protocol = @protocol_class.new(transport)
-          span.write(protocol)
-          transport.size
+          @transport ||= JaegerDriver::IntermediateTransport.new
+          @protocol ||= @protocol_class.new(@transport)
+          span.write(@protocol)
+          @transport.size
         end
       end
     end
