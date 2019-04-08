@@ -27,10 +27,6 @@ workflows:
     jobs:
       - test:
           context: org-global
-          filters:
-            branches:
-              only:
-                - employment-hero
       - publish_new_version:
           type: approval
           filters:
