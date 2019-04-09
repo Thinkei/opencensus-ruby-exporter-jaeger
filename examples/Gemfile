@@ -6,5 +6,4 @@ gem 'opencensus'
 gem 'sinatra'
 gem 'thin'
 gem 'faraday'
-gem 'opencensus-jaeger', path: "~/asobiba/opencensus-jaeger"
-gem 'pry-byebug'
+gem 'opencensus-jaeger', path: "../"
