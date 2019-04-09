@@ -1,15 +1,11 @@
 version: 2
-jobs:
-  test:
-    docker:
-      - image: circleci/ruby:2.4.1-node
-        environment:
-          LOG_LEVEL: DEBUG
-    steps:
-      - checkout
-      - run: bundle install --path vendor/bundle
-      - run: bundle exec rspec
 
+test: &test
+    - checkout
+    - run: bundle install --path vendor/bundle --jobs=4 --retry=3
+    - run: bundle exec rspec
+
+jobs:
   publish:
     docker:
       - image: ehdevops/ruby240:latest
@@ -21,16 +17,46 @@ jobs:
           command: |
             bundle exec ruby scripts/publish.rb
 
+  test-2.3:
+    steps: *test
+    docker:
+      - image: circleci/ruby:2.3-stretch
+        environment:
+          LOG_LEVEL: DEBUG
+
+  test-2.4:
+    steps: *test
+    docker:
+      - image: circleci/ruby:2.4-stretch
+        environment:
+          LOG_LEVEL: DEBUG
+
+  test-2.5:
+    steps: *test
+    docker:
+      - image: circleci/ruby:2.5-stretch
+        environment:
+          LOG_LEVEL: DEBUG
+
+  test-2.6:
+    steps: *test
+    docker:
+      - image: circleci/ruby:2.6-stretch
+        environment:
+          LOG_LEVEL: DEBUG
+
 workflows:
   version: 2
   test:
     jobs:
-      - test:
+      - test-2.3:
           context: org-global
-          filters:
-            branches:
-              only:
-                - employment-hero
+      - test-2.4:
+          context: org-global
+      - test-2.5:
+          context: org-global
+      - test-2.6:
+          context: org-global
       - publish_new_version:
           type: approval
           filters:
@@ -44,5 +70,8 @@ workflows:
               only:
                 - employment-hero
           requires:
-            - test
+            - test-2.3
+            - test-2.4
+            - test-2.5
+            - test-2.6
             - publish_new_version

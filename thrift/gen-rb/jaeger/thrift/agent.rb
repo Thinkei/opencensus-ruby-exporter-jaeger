@@ -20,6 +20,7 @@ module Jaeger
         def send_emitZipkinBatch(spans)
           send_oneway_message('emitZipkinBatch', EmitZipkinBatch_args, :spans => spans)
         end
+
         def emitBatch(batch)
           send_emitBatch(batch)
         end
