@@ -1,13 +1,33 @@
 # OpenCensus::Jaeger
 
+![](https://user-images.githubusercontent.com/15828926/55776200-24446f80-5ac6-11e9-9660-be9a987cdf4a.png)
+
 This repository contains the source to `opencensus-jaeger` gem. This library is a plugin for Ruby OpenCensus that exports data to Jaeger.   
 OpenCensus is a platform and provider-agnostic framework for distributed tracing and stats collection. For more information, see https://opencensus.io.  
 This library is not official and is created by me - [luongvo209](https://www.github.com/luongvo209). I wrote this at the time when there were no exporter to jaeger for opencensus ruby.  
-I have not published this gem to reserve the name for the official gem. Plus, it is not tested. In fact, I just wrote an example to confirm that it works.  
+I have not published this gem to reserve the name for the official gem. The gem is currently used in Production at our organisation.   
 I am awaiting reviews from official OpenCensus's side (I have emailed @dazuma and the official Opencensus's mailing list) since I hope that it would one day make it to the official organisation of opencensus. Or at least I know that I don't conflict with someone on their side if they are already working on this.  
 
-# Running Example
+# Installation
+As I explained above, I haven't published this on rubygems so unfortunately you would have to use it locally or host it somewhere else like what I am doing - publishing it to our private gem host service.
 
+## Usage
+Usage is pretty straight forward:
+
+```ruby
+OpenCensus.configure do |c|
+  c.trace.exporter = OpenCensus::Trace::Exporters::JaegerExporter.new(
+    service_name: 'some_name',
+    host: 'your_jaeger_agent_host', # default to 'localhost'
+    port: 'your_jaeger_agent_udp_port', # default to 6831
+    tags: { 'something': 'useful' },
+    max_packet_length: 12345, # config if you want something smaller than DEFAULT_MAX_LENGTH,
+    protocol_class: ::Thrift::CompactProtocol # currently supporting only compact protocol
+  )
+end
+```
+
+# Running Example
 The example is just a running webserver with two endpoints:  
 
 1. One main endpoint `/` returning `Hello world` to test tracing with Opencensus on the Rack Middleware level
@@ -35,19 +55,10 @@ cd examples
 bundle
 bundle exec rackup -s thin -p 4567
 ```
+
 If there is any error installing with bundle, you should tinker the gemfile a bit since I load this gem locally with a `path`.   
 After everything is up and running, head to `localhost:4567` and play around with the endpoints I listed above.  
 Also, you would need to go to `localhost:16686` to see the traces display by jaeger UI, which means that we succeeded in collecting them via Opencensus and exporting data to Jaeger.  
 
-# Installation
-TBD
-## Usage
-TBD
-## Development
-TBD
 ## Contributing
-TBD
-## Working proof 
-<img width="1678" alt="image" src="https://user-images.githubusercontent.com/15828926/51026192-8d4c4200-15c0-11e9-873d-b189023cd670.png">  
-
-![image](https://user-images.githubusercontent.com/15828926/50948201-3e28e300-14d4-11e9-87ee-f5d97b756131.png)
+Open a PR or issue to suggest/fix/implement features/bugs
