@@ -18,6 +18,7 @@ module OpenCensus
           host: 'localhost',
           port: 6831,
           tags: {},
+          max_packet_length: DEFAULT_MAX_LENGTH,
           protocol_class: ::Thrift::CompactProtocol
         )
           @logger = logger
@@ -37,6 +38,7 @@ module OpenCensus
             'tags': JaegerDriver.build_thrift_tags(@tags)
           )
           @protocol_class = protocol_class
+          @max_packet_length = max_packet_length
         end
 
         def export(spans)
@@ -60,16 +62,16 @@ module OpenCensus
 
           spans.each do |span|
             encoded_span = JaegerDriver.encode_span(span)
-            if aggregated_span_size(encoded_span) >= DEFAULT_MAX_LENGTH && !current_batch.empty?
+            if aggregated_span_size(encoded_span) >= @max_packet_length && !current_batch.empty?
               batches << encode_batch(current_batch)
               current_batch = []
-              @transport.flush
+              transport.flush
             end
             current_batch << encoded_span
           end
 
           batches << encode_batch(current_batch) unless current_batch.empty?
-          @transport.flush
+          transport.flush
           batches
         end
 
@@ -84,10 +86,16 @@ module OpenCensus
 
         def aggregated_span_size(span)
           # https://github.com/apache/thrift/blob/master/lib/rb/lib/thrift/struct.rb#L95
+          span.write(protocol)
+          transport.size
+        end
+
+        def transport
           @transport ||= JaegerDriver::IntermediateTransport.new
-          @protocol ||= @protocol_class.new(@transport)
-          span.write(@protocol)
-          @transport.size
+        end
+
+        def protocol
+          @protocol ||= @protocol_class.new(transport)
         end
       end
     end
