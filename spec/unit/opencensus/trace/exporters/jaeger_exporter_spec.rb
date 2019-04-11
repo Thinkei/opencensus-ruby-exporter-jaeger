@@ -17,7 +17,7 @@ end
 
 describe OpenCensus::Trace::Exporters::JaegerExporter do
   describe '.export' do
-    let(:exporter) { described_class.new(service_name: 'Test') }
+    let(:exporter) { described_class.new(service_name: 'test_service') }
     let(:root_context) { OpenCensus::Trace::SpanContext.create_root }
     let(:span_builder) { root_context.start_span "hello" }
     let(:span_builder2) { span_builder.context.start_span "world" }
@@ -31,7 +31,7 @@ describe OpenCensus::Trace::Exporters::JaegerExporter do
       context 'when spans dont exceed spans limit' do
         let(:spans) { [span_builder.to_span, span_builder2.to_span] }
         it 'encode spans to jaeger format and call client to send spans' do
-          expect(exporter.client).to receive(:send_spans).with instance_of(::Jaeger::Thrift::Batch)
+          expect(exporter.client).to receive(:send_spans).and_call_original.with instance_of(::Jaeger::Thrift::Batch)
           exporter.export(spans)
           expect(exporter.span_batches.length).to eql(1)
           expect(exporter.span_batches.first.spans.first).to be_a_valid_span
@@ -41,14 +41,14 @@ describe OpenCensus::Trace::Exporters::JaegerExporter do
 
       context 'when spans have big size' do
         let(:spans) { [] }
-        let(:spans_length) { 2_000 } # each span has size at about 55kb so this should exceeds the limit
+        let(:spans_length) { 1200 } # each span has size at about 55kb so this should exceeds the limit
 
         before do
           spans_length.times { spam_span = root_context.start_span "duplicate"; spam_span.finish!; spans << spam_span.to_span }
         end
 
         it 'encode spans to jaeger format and call client to send spans' do
-          expect(exporter.client).to receive(:send_spans).exactly(:twice).with instance_of(::Jaeger::Thrift::Batch)
+          expect(exporter.client).to receive(:send_spans).and_call_original.exactly(:twice).with instance_of(::Jaeger::Thrift::Batch)
           exporter.export(spans)
           expect(exporter.span_batches.length).to eql(2) # it exceeds limit only once
           expect(exporter.span_batches.first.spans.first).to be_a_valid_span

@@ -49,7 +49,6 @@ module OpenCensus
         end
 
         def export_as_batch(spans)
-          @logger.debug "Sending #{spans.inspect}"
           @span_batches = encode_within_limit(spans)
           @span_batches.each do |span_batch|
             @client.send_spans(span_batch)
