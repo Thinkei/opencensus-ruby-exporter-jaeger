@@ -41,7 +41,7 @@ describe OpenCensus::Trace::Exporters::JaegerExporter do
 
       context 'when spans have big size' do
         let(:spans) { [] }
-        let(:spans_length) { 1200 } # each span has size at about 55kb so this should exceeds the limit
+        let(:spans_length) { 2_000 } # each span has size at about 55kb so this should exceeds the limit
 
         before do
           spans_length.times { spam_span = root_context.start_span "duplicate"; spam_span.finish!; spans << spam_span.to_span }

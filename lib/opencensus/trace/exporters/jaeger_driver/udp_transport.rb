@@ -34,7 +34,7 @@ module OpenCensus
           rescue Errno::ECONNREFUSED
             @logger.warn 'Unable to connect to Jaeger Agent'
           rescue StandardError => e
-            @logger.warn "Unable to send spans: #{e.message}"
+            @logger.warn "Unable to send spans: #{e.class}-#{e.message}"
           end
         end
       end
