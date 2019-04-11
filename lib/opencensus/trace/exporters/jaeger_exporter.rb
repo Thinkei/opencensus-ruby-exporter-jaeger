@@ -71,6 +71,7 @@ module OpenCensus
           end
 
           batches << encode_batch(current_batch) unless current_batch.empty?
+          batches
         end
 
         def encode_batch(encoded_spans)
