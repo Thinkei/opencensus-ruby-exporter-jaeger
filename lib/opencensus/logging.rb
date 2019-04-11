@@ -1,5 +1,4 @@
 require 'logger'
-$stdout.sync = true
 
 module Logging
   def default_logger
