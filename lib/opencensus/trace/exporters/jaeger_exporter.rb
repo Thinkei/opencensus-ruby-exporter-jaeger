@@ -8,7 +8,7 @@ module OpenCensus
         JAEGER_OPENCENSUS_EXPORTER_VERSION_TAG_KEY = 'opencensus.exporter.jaeger.version'.freeze
         TRACER_HOSTNAME_TAG_KEY = 'opencensus.exporter.jaeger.hostname'.freeze
         PROCESS_IP = 'ip'.freeze
-        DEFAULT_MAX_LENGTH = 65_000
+        DEFAULT_MAX_LENGTH = 65_000 # Jaeger agent only accepts up to 65_000
 
         attr_reader :client, :span_batches
 
@@ -38,7 +38,7 @@ module OpenCensus
             'tags': JaegerDriver.build_thrift_tags(@tags)
           )
           @protocol_class = protocol_class
-          @max_packet_length = max_packet_length
+          @max_span_size = max_packet_length - process_size - 8 - 20 # 8 is UDP header , 20 is IP header
         end
 
         def export(spans)
@@ -49,7 +49,6 @@ module OpenCensus
         end
 
         def export_as_batch(spans)
-          @logger.debug "Sending #{spans.inspect}"
           @span_batches = encode_within_limit(spans)
           @span_batches.each do |span_batch|
             @client.send_spans(span_batch)
@@ -59,10 +58,11 @@ module OpenCensus
         def encode_within_limit(spans)
           batches = []
           current_batch = []
+          transport.flush
 
           spans.each do |span|
             encoded_span = JaegerDriver.encode_span(span)
-            if aggregated_span_size(encoded_span) >= @max_packet_length && !current_batch.empty?
+            if aggregated_span_size(encoded_span) >= @max_span_size && !current_batch.empty?
               batches << encode_batch(current_batch)
               current_batch = []
               transport.flush
@@ -71,7 +71,6 @@ module OpenCensus
           end
 
           batches << encode_batch(current_batch) unless current_batch.empty?
-          transport.flush
           batches
         end
 
@@ -88,6 +87,12 @@ module OpenCensus
           # https://github.com/apache/thrift/blob/master/lib/rb/lib/thrift/struct.rb#L95
           span.write(protocol)
           transport.size
+        end
+
+        def process_size
+          return @process_size if @process_size
+          @process.write(protocol)
+          @process_size = transport.size
         end
 
         def transport
