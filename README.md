@@ -2,14 +2,15 @@
 
 ![](https://user-images.githubusercontent.com/15828926/55776200-24446f80-5ac6-11e9-9660-be9a987cdf4a.png)
 
-This repository contains the source to `opencensus-jaeger` gem. This library is a plugin for Ruby OpenCensus that exports data to Jaeger.   
-OpenCensus is a platform and provider-agnostic framework for distributed tracing and stats collection. For more information, see https://opencensus.io.  
-This library is not official and is created by me - [luongvo209](https://www.github.com/luongvo209). I wrote this at the time when there were no exporter to jaeger for opencensus ruby.  
-I have not published this gem to reserve the name for the official gem. The gem is currently used in Production at our organisation.   
-I am awaiting reviews from official OpenCensus's side (I have emailed @dazuma and the official Opencensus's mailing list) since I hope that it would one day make it to the official organisation of opencensus. Or at least I know that I don't conflict with someone on their side if they are already working on this.  
+This repository contains the source to `opencensus-jaeger` gem. This library is a plugin for Ruby OpenCensus that exports data to Jaeger. Read Author's Note at the end of this readme for more information.
 
 # Installation
-As I explained above, I haven't published this on rubygems so unfortunately you would have to use it locally or host it somewhere else like what I am doing - publishing it to our private gem host service.
+
+`$ gem install opencensus-jaeger`
+
+or, place it in Bunlder's Gemfile
+
+`gem 'opencensus-jaeger'` and run `bundle install`
 
 ## Usage
 Usage is pretty straight forward:
@@ -28,7 +29,7 @@ end
 ```
 
 # Running Example
-The example is just a running webserver with two endpoints:  
+The example is just a running webserver with two endpoints: 
 
 1. One main endpoint `/` returning `Hello world` to test tracing with Opencensus on the Rack Middleware level
 2. One endpoint `/lengthy` would make an outgoing http request and then sleep for some seconds to test tracing with Opencensus on Faraday Middleware level and test adding a custom span.
@@ -62,3 +63,10 @@ Also, you would need to go to `localhost:16686` to see the traces display by jae
 
 ## Contributing
 Open a PR or issue to suggest/fix/implement features/bugs
+
+### Author's note
+
+OpenCensus is a platform and provider-agnostic framework for distributed tracing and stats collection. For more information, see https://opencensus.io.  
+This library is not official and is created by me - [luongvo209](https://www.github.com/luongvo209). I wrote this at the time when there were no exporter to jaeger for opencensus ruby.  
+~I have not published this gem to reserve the name for the official gem. The gem is currently used in Production at our organisation.~
+~I am awaiting reviews from official OpenCensus's side (I have emailed @dazuma and the official Opencensus's mailing list) since I hope that it would one day make it to the official organisation of opencensus. Or at least I know that I don't conflict with someone on their side if they are already working on this.~ 
