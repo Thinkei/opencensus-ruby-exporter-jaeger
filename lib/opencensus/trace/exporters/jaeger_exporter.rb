@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'opencensus/trace/exporters/jaeger_driver'
 
 module OpenCensus
@@ -5,9 +7,9 @@ module OpenCensus
     module Exporters
       class JaegerExporter
         include ::Logging
-        JAEGER_OPENCENSUS_EXPORTER_VERSION_TAG_KEY = 'opencensus.exporter.jaeger.version'.freeze
-        TRACER_HOSTNAME_TAG_KEY = 'opencensus.exporter.jaeger.hostname'.freeze
-        PROCESS_IP = 'ip'.freeze
+        JAEGER_OPENCENSUS_EXPORTER_VERSION_TAG_KEY = 'opencensus.exporter.jaeger.version'
+        TRACER_HOSTNAME_TAG_KEY = 'opencensus.exporter.jaeger.hostname'
+        PROCESS_IP = 'ip'
         DEFAULT_MAX_LENGTH = 65_000 # Jaeger agent only accepts up to 65_000
 
         attr_reader :client, :span_batches

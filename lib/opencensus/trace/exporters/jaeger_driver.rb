@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'socket'
 require 'thrift'
 require 'opencensus/trace/exporters/jaeger_driver/intermediate_transport'
@@ -114,8 +116,8 @@ module OpenCensus
                   VSTR => value.to_s
                 )
               end
-            rescue StandardError => error
-              logger.error "Cannot build thrift tags for #{key}:#{value}, error: #{error}"
+            rescue StandardError => e
+              logger.error "Cannot build thrift tags for #{key}:#{value}, error: #{e}"
             end
           end
         end
