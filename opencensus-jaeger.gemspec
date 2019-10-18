@@ -39,7 +39,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "opencensus", "~> 0.5.0"
   spec.add_dependency "thrift", "~> 0.11.0"
 
+  spec.add_development_dependency "pry-byebug"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "pry-byebug"
+  spec.add_development_dependency "rubocop"
 end
