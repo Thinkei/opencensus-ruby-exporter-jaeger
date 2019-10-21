@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 RSpec::Matchers.define :be_a_valid_span do |_|
@@ -8,10 +10,12 @@ RSpec::Matchers.define :be_a_valid_span do |_|
       !actual.instance_variable_get(:@spanId).nil? &&
       !actual.instance_variable_get(:@parentSpanId).nil? &&
       !actual.instance_variable_get(:@operationName).nil? &&
+      !actual.instance_variable_get(:@references).nil? &&
       !actual.instance_variable_get(:@flags).nil? &&
       !actual.instance_variable_get(:@startTime).nil? &&
       !actual.instance_variable_get(:@duration).nil? &&
-      !actual.instance_variable_get(:@tags).nil?
+      !actual.instance_variable_get(:@tags).nil? &&
+      !actual.instance_variable_get(:@logs).nil?
   end
 end
 
@@ -19,8 +23,8 @@ describe OpenCensus::Trace::Exporters::JaegerExporter do
   describe '.export' do
     let(:exporter) { described_class.new(service_name: 'test_service') }
     let(:root_context) { OpenCensus::Trace::SpanContext.create_root }
-    let(:span_builder) { root_context.start_span "hello" }
-    let(:span_builder2) { span_builder.context.start_span "world" }
+    let(:span_builder) { root_context.start_span 'hello' }
+    let(:span_builder2) { span_builder.context.start_span 'world' }
 
     before do
       span_builder2.finish!
@@ -44,7 +48,7 @@ describe OpenCensus::Trace::Exporters::JaegerExporter do
         let(:spans_length) { 2_000 } # each span has size at about 55kb so this should exceeds the limit
 
         before do
-          spans_length.times { spam_span = root_context.start_span "duplicate"; spam_span.finish!; spans << spam_span.to_span }
+          spans_length.times { spam_span = root_context.start_span 'duplicate'; spam_span.finish!; spans << spam_span.to_span }
         end
 
         it 'encode spans to jaeger format and call client to send spans' do
