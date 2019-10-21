@@ -41,8 +41,8 @@ module OpenCensus
           )
           operation_name = span.name.value
           flags = 0x01
-          start_time = span.start_time.to_f * 1_000_000
-          end_time = span.end_time.to_f * 1_000_000
+          start_time = (span.start_time.to_f * 1_000_000).to_i
+          end_time = (span.end_time.to_f * 1_000_000).to_i
           duration = end_time - start_time
 
           ::Jaeger::Thrift::Span.new(
@@ -126,9 +126,9 @@ module OpenCensus
 
         def build_logs(time_events)
           time_events.map do |event|
-            Jaeger::Thrift::Log.new(
-              TIMESTAMP => event.time.to_i,
-              LOG_FIELDS => build_thrift_tags(
+            ::Jaeger::Thrift::Log.new(
+              'timestamp' => (event.time.to_f * 1_000_000).to_i,
+              'fields' => build_thrift_tags(
                 'message.id': event.id,
                 'message.type': event.type
               )
@@ -138,7 +138,7 @@ module OpenCensus
 
         def build_references(links)
           links.map do |link|
-            Jaeger::Thrift::SpanRef.new(
+            ::Jaeger::Thrift::SpanRef.new(
               'refType' => build_span_ref(link.type),
               'traceIdLow' => base16_hex_to_int64(
                 link.trace_id.slice(0, 16)
@@ -156,9 +156,9 @@ module OpenCensus
         def build_span_ref(type)
           case type
           when OpenCensus::Trace::CHILD_LINKED_SPAN
-            Jaeger::Thrift::SpanRefType::CHILD_OF
+            ::Jaeger::Thrift::SpanRefType::CHILD_OF
           when OpenTracing::Reference::PARENT_LINKED_SPAN
-            Jaeger::Thrift::SpanRefType::FOLLOWS_FROM
+            ::Jaeger::Thrift::SpanRefType::FOLLOWS_FROM
           else
             logger.error "Cannot build thrift reference with #{ref_type}"
           end
