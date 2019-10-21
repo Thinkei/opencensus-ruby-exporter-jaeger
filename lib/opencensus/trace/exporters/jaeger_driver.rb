@@ -25,6 +25,7 @@ module OpenCensus
 
         def encode_span(span)
           tags = build_thrift_tags(span.attributes)
+          logs = build_logs(span.time_events)
           trace_id_high = base16_hex_to_int64(
             span.trace_id.slice(0, 16)
           )
@@ -54,7 +55,8 @@ module OpenCensus
             'flags': flags,
             'startTime': start_time,
             'duration': duration,
-            'tags': tags
+            'tags': tags,
+            'logs': logs
           )
         rescue StandardError => e
           puts "convert error #{e}"
@@ -119,6 +121,18 @@ module OpenCensus
             rescue StandardError => e
               logger.error "Cannot build thrift tags for #{key}:#{value}, error: #{e}"
             end
+          end
+        end
+
+        def build_logs(time_events)
+          time_events.map do |event|
+            Jaeger::Thrift::Log.new(
+              TIMESTAMP => event.time.to_i,
+              LOG_FIELDS => build_thrift_tags(
+                'message.id': event.id,
+                'message.type': event.type
+              )
+            )
           end
         end
       end
