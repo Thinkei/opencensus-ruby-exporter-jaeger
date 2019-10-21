@@ -2,6 +2,6 @@
 
 module OpenCensus
   module Jaeger
-    VERSION = '0.2.2'
+    VERSION = '0.2.2.alpha'
   end
 end
