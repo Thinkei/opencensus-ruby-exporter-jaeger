@@ -4,8 +4,8 @@ require 'socket'
 require 'thrift'
 require 'opencensus/trace/exporters/jaeger_driver/intermediate_transport'
 require 'opencensus/trace/exporters/jaeger_driver/udp_sender'
-module OpenCensus
 
+module OpenCensus
   module Trace
     module Exporters
       module JaegerDriver
