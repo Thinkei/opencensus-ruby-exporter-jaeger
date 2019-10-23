@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'opencensus/trace/exporters/jaeger_driver/udp_transport'
 
 module OpenCensus
@@ -18,8 +20,8 @@ module OpenCensus
 
           def send_spans(spans)
             @client.emitBatch(spans)
-          rescue StandardError => error
-            @logger.error "Failure while sending a batch of spans: #{error}"
+          rescue StandardError => e
+            @logger.error "Failure while sending a batch of spans: #{e}"
           end
         end
       end

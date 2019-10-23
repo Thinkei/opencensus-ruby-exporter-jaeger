@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'socket'
 require 'thrift'
 require 'opencensus/trace/exporters/jaeger_driver/intermediate_transport'
@@ -23,6 +25,8 @@ module OpenCensus
 
         def encode_span(span)
           tags = build_thrift_tags(span.attributes)
+          logs = build_logs(span.time_events)
+          references = build_references(span.links)
           trace_id_high = base16_hex_to_int64(
             span.trace_id.slice(0, 16)
           )
@@ -36,10 +40,9 @@ module OpenCensus
             span.parent_span_id
           )
           operation_name = span.name.value
-          references = []
           flags = 0x01
-          start_time = span.start_time.to_f * 1_000_000
-          end_time = span.end_time.to_f * 1_000_000
+          start_time = (span.start_time.to_f * 1_000_000).to_i
+          end_time = (span.end_time.to_f * 1_000_000).to_i
           duration = end_time - start_time
 
           ::Jaeger::Thrift::Span.new(
@@ -52,7 +55,8 @@ module OpenCensus
             'flags': flags,
             'startTime': start_time,
             'duration': duration,
-            'tags': tags
+            'tags': tags,
+            'logs': logs
           )
         rescue StandardError => e
           puts "convert error #{e}"
@@ -66,7 +70,7 @@ module OpenCensus
         def base16_hex_id_to_uint64(id)
           return nil unless id
           value = id.to_i(16)
-          value > MAX_64BIT_UNSIGNED_INT || value < 0 ? 0 : value
+          value > MAX_64BIT_UNSIGNED_INT || value.negative? ? 0 : value
         end
 
         # Thrift defines ID fields as i64, which is signed, therefore we convert
@@ -114,9 +118,49 @@ module OpenCensus
                   VSTR => value.to_s
                 )
               end
-            rescue StandardError => error
-              logger.error "Cannot build thrift tags for #{key}:#{value}, error: #{error}"
+            rescue StandardError => e
+              logger.error "Cannot build thrift tags for #{key}:#{value}, error: #{e}"
             end
+          end
+        end
+
+        def build_logs(time_events)
+          time_events.map do |event|
+            ::Jaeger::Thrift::Log.new(
+              'timestamp' => (event.time.to_f * 1_000_000).to_i,
+              'fields' => build_thrift_tags(
+                'message.id': event.id,
+                'message.type': event.type
+              )
+            )
+          end
+        end
+
+        def build_references(links)
+          links.map do |link|
+            ::Jaeger::Thrift::SpanRef.new(
+              'refType' => build_span_ref(link.type),
+              'traceIdLow' => base16_hex_to_int64(
+                link.trace_id.slice(0, 16)
+              ),
+              'traceIdHigh' => base16_hex_to_int64(
+                link.trace_id.slice(16)
+              ),
+              'spanId' => base16_hex_to_int64(
+                link.span_id
+              )
+            )
+          end
+        end
+
+        def build_span_ref(type)
+          case type
+          when OpenCensus::Trace::CHILD_LINKED_SPAN
+            ::Jaeger::Thrift::SpanRefType::CHILD_OF
+          when OpenTracing::Reference::PARENT_LINKED_SPAN
+            ::Jaeger::Thrift::SpanRefType::FOLLOWS_FROM
+          else
+            logger.error "Cannot build thrift reference with #{ref_type}"
           end
         end
       end
