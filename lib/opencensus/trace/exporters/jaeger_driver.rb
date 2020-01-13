@@ -27,11 +27,12 @@ module OpenCensus
           tags = build_thrift_tags(span.attributes)
           logs = build_logs(span.time_events)
           references = build_references(span.links)
+          trace_id = span.trace_id
           trace_id_high = base16_hex_to_int64(
-            span.trace_id.slice(0, 16)
+            trace_id.slice(0, 16)
           )
           trace_id_low = base16_hex_to_int64(
-            span.trace_id.slice(16)
+            trace_id.slice(16, trace_id.size)
           )
           span_id = base16_hex_to_int64(
             span.span_id
