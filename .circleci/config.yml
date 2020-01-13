@@ -30,7 +30,7 @@ jobs:
   test-2.7:
     steps: *test
     docker:
-      - image: circleci/ruby:2.7-stretch
+      - image: circleci/ruby:2.7.0
         environment:
           LOG_LEVEL: DEBUG
 
