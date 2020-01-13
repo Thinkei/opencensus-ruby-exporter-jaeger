@@ -6,24 +6,6 @@ test: &test
     - run: bundle exec rspec
 
 jobs:
-  publish:
-    docker:
-      - image: ehdevops/ruby240:latest
-    steps:
-      - checkout
-      - run: bundle check || bundle install --path=vendor/bundle --jobs=4 --retry=3
-      - run:
-          name: Deploy to gemfury
-          command: |
-            bundle exec ruby scripts/publish.rb
-
-  test-2.3:
-    steps: *test
-    docker:
-      - image: circleci/ruby:2.3-stretch
-        environment:
-          LOG_LEVEL: DEBUG
-
   test-2.4:
     steps: *test
     docker:
@@ -45,33 +27,22 @@ jobs:
         environment:
           LOG_LEVEL: DEBUG
 
+  test-2.7:
+    steps: *test
+    docker:
+      - image: circleci/ruby:2.7-stretch
+        environment:
+          LOG_LEVEL: DEBUG
+
 workflows:
   version: 2
   test:
     jobs:
-      - test-2.3:
-          context: org-global
       - test-2.4:
           context: org-global
       - test-2.5:
           context: org-global
       - test-2.6:
           context: org-global
-      - publish_new_version:
-          type: approval
-          filters:
-            branches:
-              only:
-                - employment-hero
-      - publish:
+      - test-2.7:
           context: org-global
-          filters:
-            branches:
-              only:
-                - employment-hero
-          requires:
-            - test-2.3
-            - test-2.4
-            - test-2.5
-            - test-2.6
-            - publish_new_version

@@ -1,5 +1,9 @@
 # RELEASE HISTORY
 
+0.2.3
+---------
+- Fix invalid parent span IDs error (#14).
+
 0.2.2
 ---------
 - Support opencensus events and links.
